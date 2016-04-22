@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<form action="/add_url/" method="get" id="add">
+        <br />
+        <br />
+        链接:
+        <input type="text" name="url" id="url" />
+        <br />
+        <br />
+        备注:
+        <input type="text" name="remark" id="remark" />
+        <br />
+        <br />
+    </form>
+        <button onclick="sure()" name="add_url" align=center>确定</button>
+
+        <button onclick="close_current()" name="close_add_url" align=center>关闭</button>
+        {% if message %}
+            <p style="color:green">添加成功！</p>
+{#            {% else %}#}
+{#            <p style="color:green">添加失败！</p>#}
+        {% endif %}
+
+
+</body>
+</html>
+<script>
+    function sure(){
+{#        alert('请输入完整内容！')#}
+        url = document.getElementById('url').value
+        remark = document.getElementById('remark').value
+        if (url && remark)
+        {
+            var confirmMsg = confirm("确定?");
+            if (confirmMsg) {
+
+                document.getElementById('add').submit();
+            } else {
+                return false;
+            }
+        }
+        else{
+            alert('请输入完整内容！')
+        }
+    }
+function close_current()
+{
+    window.close()
+    parent.location.reload();
+}
+</script>

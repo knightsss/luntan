@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>captcha</title>
+    <style type="text/css">
+        body {background-color:gainsboro}
+        #content {
+            background:mediumslateblue;
+            position: absolute;width:400px;height:120px;left:50%;top:50%;
+            margin-left:-200px;margin-top:-100px;border:1px solid #00F
+{#            line-height: 100px;#}
+            }
+    </style>
+</head>
+<body>
+        <form action="/login_uc/" method="get">
+{#        <input name="driver" value={{ driver }}>#}
+        <div align="center">
+            {% if error %}
+                    <p style="color:red">Please submit a search term.</p>
+            {% endif %}
+        </div>
+        <div id = "content" align="center" >
+            <br>
+{#            <input name="driver" value={{ driver }}>#}
+            <br>
+            验证码：<input type="text" name="captcha"><img src="/site_static/uc_captcha.jpg" width="60" height="20" />
+            <br>
+            <br>
+            <input type="submit" value="确定">
+        </div>
+    </form>
+</body>
+</html>

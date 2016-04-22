@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<form action="/add_reply/" id='add_reply_content' method="get">
+        <br />
+        <br />
+        回复内容:
+        <input type="text" name="content" id="content" />
+        <br />
+        <br />
+{#        <input type="submit" name="add_reply" align=center  value="确定">#}
+</form>
+        <button onclick="sure()" name="add_url" align=center>确定</button>
+        <button onclick="close_current()" name="close_add_url" align=center>关闭</button>
+
+        {% if message %}
+            <p style="color:green">添加成功！</p>
+{#            {% else %}#}
+{#            <p style="color:green">添加失败！</p>#}
+        {% endif %}
+</body>
+</html>
+
+<script>
+    function sure(){
+        content = document.getElementById('content').value
+        if (content)
+        {
+            var confirmMsg = confirm("确定?");
+            if (confirmMsg) {
+
+                document.getElementById('add_reply_content').submit();
+{#                parent.location.reload();#}
+{#                window.close()#}
+
+            } else {
+                return false;
+            }
+        }
+        else{
+            alert('请输入内容！')
+        }
+    }
+function close_current()
+{
+    window.close()
+    parent.location.reload();
+}
+</script>

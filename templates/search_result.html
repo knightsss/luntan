@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <form>
+        <p> You search for: <strong>{{ query }}</strong></p>
+
+        {% if login %}
+            <p>Found {{ login|length }} user{{ login|pluralize }}</p>
+
+            <ul>
+{#                {% for login in logins %}#}
+                    <li>登录名：{{ login.login_name }} 密码：{{ login.pwd }}</li>
+{#                    {% endfor %}#}
+            </ul>
+        {% else %}
+            <p>No login matched your search criteria.</p>
+        {% endif %}
+    </form>
+</body>
+</html>

@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style type="text/css">
+        body {background-color:floralwhite}
+            #content {
+            background:burlywood;
+            position: absolute;width:400px;height:160px;left:50%;top:50%;
+            margin-left:-200px;margin-top:-100px;border:1px solid saddlebrown;
+{#            line-height: 100px;#}
+            }
+{#        #content {#}
+{#            background:mediumslateblue;#}
+{#            position: absolute;width:400px;height:160px;left:50%;top:50%;#}
+{#            margin-left:-200px;margin-top:-100px;border:1px solid #00F#}
+{#            line-height: 100px;#}
+{#            }#}
+    </style>
+</head>
+<body>
+
+    <form action="/search/" method="get">
+        <div align="center">
+            {% if error %}
+                    <p style="color:red">请将用户名和密码输入完整！</p>
+            {% endif %}
+
+            {% if error2 %}
+                    <p style="color:red">用户名密码不匹配，请重新输入！</p>
+            {% endif %}
+            {% if error3 %}
+                    <p style="color:red">用户名不存在！</p>
+            {% endif %}
+        </div>
+        <div id = "content" align="center" >
+            <br>
+            <br>
+            帐    号：<input type="text" name="login_name">
+            <br>
+            <br>
+            密    码：<input type="text" name="pwd">
+            <br>
+            <br>
+{#            验证码：<input type="text" name="captcha"><img src="/site_static/captcha.jpg" width="60" height="20" />#}
+{#            <br>#}
+{#            <br>#}
+            <input type="submit" value="登陆">
+        </div>
+    </form>
+</body>
+</html>
