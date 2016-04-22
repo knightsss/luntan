@@ -14,6 +14,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponse
 
 from replies.models import Login,Url,Reply,Ip
+from postbartask import Postbartask
 
 
 from django.views.decorators.csrf import csrf_exempt    #用于处理post请求出现的错误
@@ -159,6 +160,14 @@ def reply(request):
         # content = "23333333"
 
         content = content.encode('utf-8')
+
+        t=Postbartask()
+        if True:
+            t.start()
+        else:
+            t.stop()
+        
+            
         # posttime,fid,tid,extra,formhash = get_data_from_html(opener,url)          #获取当前页面的参数
         # send_content(opener,posttime,fid,tid,extra,formhash,url,content)          #发送数据
         message.append(1)
