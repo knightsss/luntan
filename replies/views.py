@@ -12,9 +12,11 @@ import re
 from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
+from django.template import loader,Context
 
 from replies.models import Login,Url,Reply,Ip
-from postbartask import Postbartask
+# from postbartask import ThreadControl
+from login_thread import ThreadControl
 
 
 from django.views.decorators.csrf import csrf_exempt    #用于处理post请求出现的错误
@@ -42,33 +44,11 @@ def login_out(request):
     except:
         pass
     return render_to_response('login.html')
-#######################测试登陆结果###################################
-def login_result(request):
-    if request.method == 'GET':
-        message_list = []
-        if 'user' in request.GET:
-            message = 'You searched for: %r' % request.GET['user']
-            message_list.append(message)
-        if 'pwd' in request.GET:
-            message = 'You searched for: %r' % request.GET['pwd']
-            message_list.append(message)
-        if 'captcha' in request.GET:
-            message = 'You searched for: %r' % request.GET['captcha']
-            message_list.append(message)
-        else:
-            message = 'You submitted an empty form.'
-        return HttpResponse(message_list)
-    return render_to_response('login_result.html')
 
 ####################查询密码和帐号是否一致#########################
 @csrf_exempt   #处理Post请求出错的情况
 def search(request):
     error = False
-    Urls = Url.objects.get_queryset()
-    Replys = Reply.objects.get_queryset()
-    message = []
-    message.append(Urls)
-    message.append(Replys)
     if 'login_name' in request.GET:
         name = request.GET['login_name']
         password = request.GET['pwd']
@@ -86,6 +66,11 @@ def search(request):
                 # return render_to_response('search_result.html',{'login':login,'query':name})  #测试 密码和账户名一致
                 request.session['login_name'] = name
                 # return HttpResponse(request.session['login_name'])
+                Urls = Url.objects.filter(login_name=name)
+                Replys = Reply.objects.filter(login_name=name)
+                message = []
+                message.append(Urls)
+                message.append(Replys)
                 return render_to_response('reply.html',{'message':message})
             else:
                 error2 = True
@@ -102,12 +87,13 @@ def add_url(request):
     try:
         new_url = request.GET['url']
         new_remark = request.GET['remark']
+        login_name = request.session['login_name']
         if (not new_url) or (not new_remark):
             error = True
             return render_to_response('disply_add_url.html',{'error':error})
         # message.append(new_url)
         # message.append(new_remark)
-        u = Url(url=new_url, remark=new_remark)           #将数据添加到模板中
+        u = Url(url=new_url, remark=new_remark,login_name=login_name,sign='1')           #将数据添加到模板中
         u.save()                      #同步到数据库
         message = True
     except:
@@ -123,11 +109,12 @@ def add_reply(request):
     error = False
     try:
         new_content = request.GET['content']
+        login_name = request.session['login_name']
         if not new_content:
             error = True
             return render_to_response('disply_add_reply.html',{'error':error})
         # message.append(new_content)
-        r = Reply(content=new_content)           #将数据添加到模板中
+        r = Reply(content=new_content,login_name=login_name,sign='1')           #将数据添加到模板中,修改
         r.save()                      #同步到数据库
         # message.append('sucess')
         message = True
@@ -142,93 +129,141 @@ def test(request):
 @csrf_exempt   #处理Post请求出错的情况
 def reply(request):
     message = []
-    Urls = Url.objects.get_queryset()
-    Replys = Reply.objects.get_queryset()
+    login_name = request.session['login_name']
+    Urls = Url.objects.filter(login_name=login_name)
+    Replys = Reply.objects.filter(login_name=login_name)
     message.append(Urls)
     message.append(Replys)
     try:
         cookie_name = request.session['login_name']
+        print cookie_name
         opener = login_jiuyou(cookie_name)
-
-        # url = "http://bbs.9game.cn/forum.php?mod=viewthread&tid=17834214&extra=page%3D3%26filter%3Dtypeid%26typeid%3D46918%26typeid%3D46918"
         try:
-            url = request.POST['url_radio']
+            elements = request.POST #request.getParameterValues('url_radio')\    #获取所有参数
+            url_list = elements.lists()[0][1]                   #过滤后剩余urls列表相关参数
             content = request.POST['reply_radio']
         except:
+            print "error"
             error = True
-            return render_to_response('reply.html',{'message':message})
-        # content = "23333333"
+            return render_to_response('reply.html',{'message':message})         #如果从自动回帖返回或者其他地方进来，则content会获取失败，进而不会显示发送失败还是成功，只显示数据页面。
 
         content = content.encode('utf-8')
-
-        t=Postbartask()
-        if True:
-            t.start()
-        else:
-            t.stop()
-        
-            
-        # posttime,fid,tid,extra,formhash = get_data_from_html(opener,url)          #获取当前页面的参数
-        # send_content(opener,posttime,fid,tid,extra,formhash,url,content)          #发送数据
+        for url in url_list:
+            print url,"开始回帖..."
+            posttime,fid,tid,extra,formhash = get_data_from_html(opener,url)          #获取当前页面的参数
+            send_content(opener,posttime,fid,tid,extra,formhash,url,content)          #发送数据
         message.append(1)
+        flag=True
     except:
+        flag=False
         message.append(0)
     # return HttpResponse(request.session['login_name'])
-    return render_to_response('reply.html',{'message':message})
+    return render_to_response('reply.html',{'message':message,'flag':flag})
 
-
-
-
-global flag
-flag = False
 
 #自动回复
 @csrf_exempt   #处理Post请求出错的情况
 def auto_reply(request):
     message = []
-    Urls = Url.objects.get_queryset()
-    Replys = Reply.objects.get_queryset()
+    author = request.session['login_name']
+    print'author is', author
+    Urls = Url.objects.filter(login_name=author)
+    Replys = Reply.objects.filter(login_name=author)
     message.append(Urls)
     message.append(Replys)
     try:
-        cookie_name = request.session['login_name']
-        opener = login_jiuyou(cookie_name)
-        # url = "http://bbs.9game.cn/forum.php?mod=viewthread&tid=17834214&extra=page%3D3%26filter%3Dtypeid%26typeid%3D46918%26typeid%3D46918"
-        try:
-            url = request.POST['url_radio']
-            content = request.POST['reply_radio']
-            # radio = request.POST['s_radio']
-            second = request.POST['set_time_name']
-            count = request.POST['set_count_name']
-            # if radio=='start':
-            #     flag = True
-            # if radio == 'end':
-            #     flag = False
-        except:
-            error = True
-            return render_to_response('auto_reply.html',{'message':message})
-        # content = "23333333"
-        content = content.encode('utf-8')
-        count = int(count)
-        for num in range(count):
-            time.sleep(int(second))
-            # print "---------------"
-            # print "hello:\t",flag
-            print url
-            # posttime,fid,tid,extra,formhash = get_data_from_html(opener,url)          #获取当前页面的参数
-            # send_content(opener,posttime,fid,tid,extra,formhash,url,content)          #发送数据
-        message.append(1)
+        second = request.POST['set_time_name']
     except:
+        print "end"
+        second = 60
+    second = int(second)
+
+    s = request.POST['s_radio']
+    try:
+        elements = request.POST    #获取所有参数
+        url_list = elements.lists()[1][1]                   #过滤后剩余urls列表相关参数
+        # url = request.POST['url_radio']
+        content = request.POST['reply_radio']
+        # return HttpResponse(url_list)
+    except:
+        url = ""
+        content = ""
+    if s == 'start':
+        flag = 1
+    if s == 'end':
+        flag = 0
+    print "s",s
+    content = content.encode('utf-8')
+    t1 = ThreadControl()
+    if s == 'start':
+        print "start..."
+        t1.start(author,second,url_list,content)
+        # message.append(second)
+        # request.session['reply']
+        message.append(1)
+    if s == 'end':
+        print "stop..."
+        t1.stop(author)
         message.append(0)
     return render_to_response('auto_reply.html',{'message':message})
+    # try:
+    #     cookie_name = request.session['login_name']
+    #     opener = login_jiuyou(cookie_name)
+    #     try:
+    #         url = request.POST['url_radio']
+    #         content = request.POST['reply_radio']
+    #
+    #     except:
+    #         error = True
+    #         return render_to_response('auto_reply.html',{'message':message})
+    #     # content = "23333333"
+    #     content = content.encode('utf-8')
+    #     if s == 'start':
+    #         t1.start(author,second,url,content)
+    #         # message.append(second)
+    #         # request.session['reply']
+    #         message.append(1)
+    #     if s == 'end':
+    #         print "start_stop..."
+    #         t1.stop(author)
+    #         message.append(0)
+    #     # count = int(count)
+    #     # for num in range(count):
+    #     #     time.sleep(int(second))
+    #     #     print url
+    #     #     # posttime,fid,tid,extra,formhash = get_data_from_html(opener,url)          #获取当前页面的参数
+    #     #     # send_content(opener,posttime,fid,tid,extra,formhash,url,content)          #发送数据
+    #
+    # except:
+    #     return HttpResponse("error")
+    # return render_to_response('auto_reply.html',{'message':message})
+
+
+def display_auto_reply(request):
+    message = []
+    author = request.session['login_name']
+    Urls = Url.objects.filter(login_name=author)
+    Replys = Reply.objects.filter(login_name=author)
+    message.append(Urls)
+    message.append(Replys)
+    return render_to_response('auto_reply.html',{'message':message})
+    # author = request.session['login_name']
+    # t = loader.get_template('auto_reply.html')
+    # c = Context({
+    #     'message':message,
+    #     'current_author':author,
+    # })
+    # return t.render(c)
+    # return render_to_response('auto_reply.html',{'message':message})
 
 
 #删除url记录
 @csrf_exempt   #处理Post请求出错的情况
 def delete_url(request):
     message = []
-    Urls = Url.objects.get_queryset()
-    Replys = Reply.objects.get_queryset()
+    login_name = request.session['login_name']
+    Urls = Url.objects.filter(login_name=login_name)
+    Replys = Reply.objects.filter(login_name=login_name)
     message.append(Urls)
     message.append(Replys)
     try:
@@ -243,8 +278,9 @@ def delete_url(request):
 @csrf_exempt   #处理Post请求出错的情况
 def delete_content(request):
     message = []
-    Urls = Url.objects.get_queryset()
-    Replys = Reply.objects.get_queryset()
+    login_name = request.session['login_name']
+    Urls = Url.objects.filter(login_name=login_name)
+    Replys = Reply.objects.filter(login_name=login_name)
     message.append(Urls)
     message.append(Replys)
     try:
@@ -257,14 +293,14 @@ def delete_content(request):
 
 def login_jiuyou(cookie_name):
     cookiejar = cookielib.MozillaCookieJar()
-    file_path = "E:\\Python\\UC\\django\\luntan\\replies\\" + cookie_name + ".txt"
+    file_path = "E:\\Python\\UC\\django\\luntan\\cookie_file\\" + cookie_name + ".txt"     #更改
     print file_path
     f = file(file_path)
     source = f.read()
     targets = json.JSONDecoder().decode(source)
     # print target
     for target in targets:
-        cookielib.Cookie
+        # cookielib.Cookie
         cookie_item = cookielib.Cookie(
             version=0, name=target['name'],value=target['value'],
                         port=None, port_specified=None,
@@ -311,13 +347,14 @@ def send_content(opener,posttime,fid,tid,extra,formhash,url,content):
     # request.add_header("Upgrade-Insecure-Requests", "1")
     request.add_header("Connection", "keep-alive")
     request.add_header("Host", "bbs.9game.cn")
-
-    opener.open(request, post_data)
-    print "Reply OK !"
+    try:
+        opener.open(request, post_data)
+        print "Reply OK !"
+    except:
+        print "Reply Faild !"
 
 def get_data_from_html(opener,url):
     html = opener.open(url).read()
-    # print html
     soup = BeautifulSoup(html)
     ##################get  formhash
     dict = {}
@@ -353,7 +390,6 @@ def get_data_from_html(opener,url):
 
 def get_data_from_html_old(opener,url):
     html = opener.open(url).read()
-    # print html
     soup = BeautifulSoup(html)
     # print soup.find(id='posttime')
 

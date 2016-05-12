@@ -13,23 +13,40 @@ class Singleton(object):
             cls._inst=super(Singleton,cls).__new__(cls,*args,**kwargs)
         return cls._inst
 
-class Postbartask(threading.Thread):
+class MyThread(threading.Thread):
     _running=True
-    def __new__(cls,*args,**kwargs):
-        if not hasattr(cls,'_inst'):
-            cls._inst=super(Postbartask,cls).__new__(cls,*args,**kwargs)
-        return cls._inst
+    account=""
     def run(self):
         while self._running:
             time.sleep(1)
-            print "hello"
+            print "hello:",self.account
         else:
-            print "stop"
+            print "stop:",self.account
     def stop(self):
         self._running=False
-        
-t=Postbartask()
-t.start()
-time.sleep(5)
-t2=Postbartask()
-t2.stop()
+
+class ThreadControl():
+    _running=True
+    threadMap={}
+    def __new__(cls,*args,**kwargs):
+        if not hasattr(cls,'_inst'):
+            cls._inst=super(ThreadControl,cls).__new__(cls,*args,**kwargs)
+        return cls._inst
+    
+    def start(self,account):
+        if self.threadMap.has_key(account) == False:
+            print "starting:",account
+            tt = MyThread();
+            tt.start()
+            tt.account=account
+            self.threadMap[account]=tt
+    
+    def stop(self,account):
+        if self.threadMap.has_key(account) == True:
+            print "stopping:",account
+            tt=self.threadMap[account]
+            tt.stop()
+            try:
+                self.threadMap.pop(account)
+            except:
+                pass

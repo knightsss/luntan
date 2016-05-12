@@ -2,19 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>欢迎来到自动回帖</title>
+    <title>欢迎来到自动访问</title>
 </head>
 <body>
-{#<form action="/auto_reply_deal/" methord>#}
-{#    #}
-{#</form>#}
+
 <table>
     <tr>
         <td>
-            <button onclick="judgeautoreply()" style="margin-left:0px; margin-top:10px;width: 100px;height: 35px;font-size:16px">提交</button>
+            <button onclick="judgeautovisit()" style="margin-left:0px; margin-top:10px;width: 100px;height: 35px;font-size:16px">提交</button>
+        </td>
+{#        <td>#}
+{#            {% if flag %} 正在访问...{%  %}访问结束{% endif %}#}
+{#        </td>#}
+        <td>
+            <input type="button" onclick="input_ip()" id="input_ip" name="input_ip" value="导入IP" style="margin-left:0px; margin-top:10px;font-size:16px;width: 100px;height: 35px;" >
         </td>
         <td>
-            <button type="number"  id="return_reply_button"  onclick="return_reply()" style="margin-left:1450px;  margin-top:10px;width: 100px;height: 35px;font-size:16px">返回</button>
+            <input type="button" onclick="output_ip()" id="input_ip" name="input_ip" value="导出IP" style="margin-left:0px; margin-top:10px;font-size:16px;width: 100px;height: 35px;" >
+        </td>
+{#        <td>#}
+{#            <a href="/fileDownload/filename={{ file_name }}" onclick="output_ip()"><div>导出IP</div></a>#}
+{#        </td>#}
+        <td>
+            <input type="button"  id="refresh_button"  onclick="refresh()" style="margin-left:1150px;  margin-top:10px;width: 100px;height: 35px;font-size:16px" value="刷新">
+        </td>
+        <td>
+            <button  id="return_reply_button"  onclick="return_reply()" style="margin-left:0px;  margin-top:10px;width: 100px;height: 35px;font-size:16px">返回</button>
         </td>
     </tr>
 </table>
@@ -22,18 +35,35 @@
 
 </form>
 
-<form action="/auto_reply/" method="post" id="auto_reply_via_url_content">
+<form action="/fileDownload/filename={{ file_name }}/" id="output_ip" method="GET" >
+
+</form>
+
+<form action="/display_auto_visit/" id="refresh" method="GET" >
+
+</form>
+
+<form action="/auto_visit/" method="post" id="auto_visit_via_url_ip">
             <table>
                 <tr>
                     <td>
                         设置频率:<input type="number" value="60" id="set_time_id" name="set_time_name" value="time" style="margin-left:0px; margin-top:10px; width:50px">秒
                     </td>
                     <td>
-                        <input type="radio"  id="s_radio_id" name="s_radio" value="start" style="margin-left:50px; margin-top:10px"> 开始回帖
+                        设置次数:<input type="number" value="0" id="set_count_id" name="set_count_name" value="time" style="margin-left:0px; margin-top:10px; width:50px">次
                     </td>
                     <td>
-                        <input type="radio"  id="e_radio_id" name="s_radio" value="end" style="margin-left:50px; margin-top:10px" > 停止回帖
+                        <input type="radio"  id="s_radio_id" name="s_radio" value="start" style="margin-left:50px; margin-top:10px"> 开始访问
                     </td>
+                    <td>
+                        <input type="radio"  id="e_radio_id" name="s_radio" value="end" style="margin-left:50px; margin-top:10px" > 停止访问
+                    </td>
+{#                    <td>#}
+{#                        <input type="button" onclick="input_ip()" id="input_ip" name="input_ip" value="导IP" style="margin-left:50px; margin-top:10px" >刀ip</input>#}
+{#                    </td>#}
+{#                    <td>#}
+{#                        <input type="button" onclick="output_ip()" id="output_ip" name="output_ip" value="导出IP" style="margin-left:50px; margin-top:10px" >#}
+{#                    </td>#}
                 </tr>
             </table>
 {% for m in message %}
@@ -78,11 +108,9 @@
                     </DIV>
                 </TD>
                 </TR>
-{#              </TBODY>#}
+
             </TABLE>
-{#                <input type="radio" name="sex" value="male" /> Male#}
-{#                <br />#}
-{#                <input type="radio" name="sex" value="Female" /> Female#}
+
         </DIV>
   {% elif forloop.counter == 2 %}
         <DIV align=center >
@@ -95,9 +123,11 @@
 {#                        <TD align=middle bgcolor="#f5f5dc" colSpan=5><FONT  size=2>回复内容表</FONT></TD>#}
 {#                      </TR>#}
                       <TR>
-                          <TD width="5%"  bgcolor="#deb887"><FONT  size=3>选择</FONT></TD>
+{#                          <TD width="5%"  bgcolor="#deb887"><FONT  size=3>选择</FONT></TD>#}
                         <TD width="5%" bgcolor="#deb887"><FONT size=3>编号</FONT></TD>
-                        <TD width="90%" bgcolor="#deb887"><FONT size=3>回复内容</FONT></TD>
+                        <TD width="45%" bgcolor="#deb887"><FONT size=3>IP</FONT></TD>
+                          <TD width="45%" bgcolor="#deb887"><FONT size=3>端口</FONT></TD>
+                          <TD width="5%" bgcolor="#deb887"><FONT size=3>删除</FONT></TD>
 
                       </TR>
                     </TABLE>
@@ -109,9 +139,11 @@
                       <TABLE style="BORDER-COLLAPSE: collapse"  height=150 cellSpacing=1 cellPadding=6 width="99%" class="table table-striped table-bordered">
                           {% for r in m %}
                                 <TR>
-                                  <TD width="5%" bgColor=#f5f5dc height=17><FONT size=3><input type="radio" id="reply_radio_id" name="reply_radio" value={{ r.content }}></font></TD>
+{#                                  <TD width="5%" bgColor=#f5f5dc height=17><FONT size=3><input type="radio" id="reply_radio_id" name="reply_radio" value={{ r.content }}></font></TD>#}
                                   <TD width="5%" bgColor=#f5f5dc height=17><FONT size=3>{{ r.id }}</FONT></TD>
-                                  <TD width="90%" bgColor=#f5f5dc height=17><FONT size=3>{{ r.content }}</FONT></TD>
+                                  <TD width="45%" bgColor=#f5f5dc height=17><FONT size=3>{{ r.ip }}</FONT></TD>
+                                <TD width="45%" bgColor=#f5f5dc height=17><FONT size=3>{{ r.port }}</FONT></TD>
+                                <td width="5%" bgColor=#f5f5dc height=17><a style="cursor: pointer;color: dodgerblue"  onclick="delete_ip({{ r.id }})">删除</a></td>
                                 </TR>
                             {% endfor %}
                       </TABLE>
@@ -123,10 +155,10 @@
     {% else %}
         {% if m %}
 {#            alert("成功！");#}
-            <p>正在回帖中...</p>
+            <p>导入完成.</p>
         {% else %}
 {#            alert("失败！");#}
-            <p>回帖完成</p>
+            <p>导入失败</p>
         {% endif %}
 {#      </script>#}
   {% endif %}
@@ -193,28 +225,32 @@ function judgeRadioClicked()
     }
 }
 
-function judgeautoreply()
+function judgeautovisit()
 {
     //获得 单选选按钮name集合
     var s_radio_flag = document.getElementById('s_radio_id').checked;
     var e_radio_flag = document.getElementById('e_radio_id').checked;
     if (s_radio_flag || e_radio_flag) {
+        {# 选择停止按钮 #}
         if (e_radio_flag){
             time = document.getElementById('set_time_id').value
-            if (time>0){
-                document.getElementById('auto_reply_via_url_content').submit();
+            count = document.getElementById('set_count_id').value
+            if (time>0 && count>=0){
+                document.getElementById('auto_visit_via_url_ip').submit();
             }
             else{
-                alert('请确认时间是大于0的整数！')
+                alert('请确保时间和次数是非负整数！')
             }
 
         }
+        {# 选择开始按钮 #}
         if (s_radio_flag){
             var url_radios = document.getElementsByName("url_radio");
-            var reply_radios = document.getElementsByName("reply_radio");
+{#            var reply_radios = document.getElementsByName("reply_radio");#}
             var url_flag = 0
             var reply_flag = 0
             //根据 name集合长度 遍历name集合
+            {# 判断是否选中遍历的url #}
             for(var i=0;i<url_radios.length;i++)
             {
                 //判断那个单选按钮为选中状态
@@ -223,36 +259,75 @@ function judgeautoreply()
                     url_flag = 1
                 }
             }
-            for(var i=0;i<reply_radios.length;i++)
-            {
-                //判断那个单选按钮为选中状态
-                if(reply_radios[i].checked) {
-                    //弹出选中单选按钮的值
-                    reply_flag = 1
-                }
-            }
+            {# 判断是否选中回复内容 #}
+{#            for(var i=0;i<reply_radios.length;i++)#}
+{#            {#}
+{#                //判断那个单选按钮为选中状态#}
+{#                if(reply_radios[i].checked) {#}
+{#                    //弹出选中单选按钮的值#}
+{#                    reply_flag = 1#}
+{#                }#}
+{#            }#}
 
-            if (url_flag && reply_flag) {
+            if (url_flag ) {
                 time = document.getElementById('set_time_id').value
-                {#        count = document.getElementById('set_count_id').value#}
-                if (time > 0) {
-                    document.getElementById('auto_reply_via_url_content').submit();
+                count = document.getElementById('set_count_id').value
+                if (time > 0 && count >= 0) {
+                    document.getElementById('auto_visit_via_url_ip').submit();
 {#                    alert('点击确定开始回帖！')#}
                 }
                 else {
-                    alert("请输入正确的时间！")
+                    alert("请输入正确的时间和次数，次数为0时无限循环！")
                 }
             }
             else {
-                alert("请选择url地址和要回复的内容！");
+                alert("请选择url地址！");
             }
         }
     }
     else{
-        alert('请选择开始或者结束回帖！')
+        alert('请选择开始或者结束访问！')
     }
 }
 function return_reply(){
     document.getElementById('return_reply_form').submit();
+}
+
+function input_ip(){
+    window.open('input_ip.html', 'newwindow', 'height=300, width=400, top=300, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no')
+}
+function output_ip(){
+    alert('下载？')
+    document.getElementById('output_ip').submit();
+}
+
+function refresh(){
+    document.getElementById('refresh').submit();
+}
+
+function delete_ip(id){
+    var confirmMsg = confirm("确定删除?");
+    if (confirmMsg) {
+        post("/delete_ip/",{"id":id});
+    } else {
+        return false;
+    }
+}
+function post(URL, PARAMS) {
+    console.log(PARAMS);
+    var temp = document.createElement("form");
+    temp.action = URL;
+    temp.method = "post";
+    temp.style.display = "none";
+    for (var x in PARAMS) {
+        var opt = document.createElement("input");
+        opt.name = x;
+        opt.value = PARAMS[x];
+        temp.appendChild(opt);
+    }
+    console.log(temp);
+    document.body.appendChild(temp);
+    temp.submit();
+    return temp;
 }
 </script>

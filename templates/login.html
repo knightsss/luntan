@@ -32,7 +32,7 @@
                     <p style="color:red">用户名密码不匹配，请重新输入！</p>
             {% endif %}
             {% if error3 %}
-                    <p style="color:red">用户名不存在！</p>
+                    <p style="color:red">用户名不存在或该用户名不可用！</p>
             {% endif %}
         </div>
         <div id = "content" align="center" >
@@ -47,8 +47,29 @@
 {#            验证码：<input type="text" name="captcha"><img src="/site_static/captcha.jpg" width="60" height="20" />#}
 {#            <br>#}
 {#            <br>#}
-            <input type="submit" value="登陆">
+            <table>
+                <tr>
+                    <td>
+                        <input type="submit" value="登陆">
+                    </td>
+                    <td>
+                        <input type="button" onclick="register()" style=" margin-left: 40px" value="注册">
+                    </td>
+                </tr>
+            </table>
+
         </div>
     </form>
+
+{#<form action="/display_register/" id="display_register" method="get">#}
+{#<div align="center" >#}
+{#     <button onclick="display_register()" style="background: white; margin-left: 110px; margin-top: 473px; position: relative" value="注册">注册</button>#}
+{#</div>#}
+{#</form>#}
 </body>
 </html>
+<script>
+function register() {
+    window.open('register.html', 'newwindow', 'height=300, width=500, top=300, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no')
+}
+</script>

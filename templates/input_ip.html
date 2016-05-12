@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<form method="post" enctype="multipart/form-data" action="/input_ip/" id="input_ip">
+            <br>
+            <br>
+            <div>IP文件(txt格式,IP与端口号以Tab作为分隔符)：<input type="file" name="input_ip_file" id="input_ip_file" /><a style="color: red">{% if load_file_null %} 文件不能为空 </a>{% endif %}</div>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <input type="button"onclick="check_form()" value="提交" >   <input type="button" style="margin-left: 100px" onclick="close_register()" value="关闭"/>
+</form>
+
+{#<p style="color: red">{% if user_exist %} 用户已存在，请直接登陆更新cookie{% endif %}{% if name_differ %} 用户名与文件名不一致，请修改文件名为{{ name }}.txt{% endif %}</p>#}
+</body>
+</html>
+<script>
+
+{#function register() {#}
+{#    window.open('register.html', 'newwindow', 'height=300, width=400, top=300, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no')#}
+function close_register(){
+    window.close()
+}
+function check_form(){
+
+    var file = document.getElementById('input_ip_file').value;
+    if (file) {
+        document.getElementById('input_ip').submit();
+    }
+    else{
+        alert('文件不能为空');
+    }
+}
+</script>

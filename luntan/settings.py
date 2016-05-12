@@ -47,6 +47,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 )
 
 ROOT_URLCONF = 'luntan.urls'
@@ -97,5 +99,11 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     'static',
 )
+
+# MEDIA_ROOT=os.path.join(BASE_DIR,'/media/')
+# MEDIA_URL="/data/"
+
+HERE = os.path.dirname(__file__)
+MEDIA_ROOT =  HERE+STATIC_URL
 
 TEMPLATE_DIRS = (os.path.join(BASE_DIR,  'templates'),)

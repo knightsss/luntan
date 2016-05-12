@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<form method="post" enctype="multipart/form-data" action="/register/" id="register">
+            <div>帐    号：<input type="text" name="login_name" id="login_name"><a style="color: red">{% if login_name_null %}  用户名不能为空 {% endif %}</a></div>
+            <br>
+            <br>
+            <div>密    码：<input type="text" name="pwd" id="pwd"><a style="color: red">{% if pwd_null %}  密码不能为空 {% endif %}</a></div>
+{#            <br>#}
+{#            <br>#}
+{#            密    码：<input type="text" name="pwd2">#}
+            <br>
+            <br>
+            <div>cookie文件(txt格式)：<input type="file" name="file" id="file" /><a style="color: red">{% if load_file_null %} 文件不能为空 {% endif %}</div>
+            <br>
+            <br>
+            <input type ="button" onclick="check_form()" value="提交" />   <input type="button" style="margin-left: 100px" onclick="close_register()" value="关闭"/>
+</form>
+<p style="color: red">{% if user_exist %} 用户已存在，请直接登陆更新cookie{% endif %}{% if name_differ %} 用户名与文件名不一致，请修改文件名为{{ name }}.txt{% endif %}</p>
+</body>
+</html>
+<script>
+
+{#function register() {#}
+{#    window.open('register.html', 'newwindow', 'height=300, width=400, top=300, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no')#}
+function close_register(){
+    window.close()
+}
+function check_form(){
+    var login_name = document.getElementById('login_name').value;
+    var pwd = document.getElementById('pwd').value;
+    var file = document.getElementById('file').value;
+{#    if (login_name && pwd && file){#}
+{#        #}
+{#    }#}
+
+    if (login_name) {
+        if (pwd) {
+            if (file) {
+                document.getElementById('register').submit();
+            }
+            else{
+                alert('文件不能为空');
+            }
+        }
+        else{
+            alert('密码不能为空');
+        }
+    }
+    else{
+        alert('用户名不能为空');
+    }
+}
+</script>

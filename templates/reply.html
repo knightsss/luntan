@@ -35,14 +35,20 @@
 </td>
     <td>
 {#    <input type="button" name="reply_content" onclick="test()" align=center style="margin-left:50px; font-size: 14px;margin-top:0px;background:#f5f5dc; border-color:#f5f5dc" align="center" value="测试">#}
-     <button name="reply_content" onclick="refresh_page()" style="margin-left:1050px;width: 100px;height: 35px" >刷新</button>
+     <button name="refresh" onclick="refresh_page()" style="margin-left:850px;width: 100px;height: 35px" >刷新</button>
+</td>
+    <td>
+     <input type="button" name="update_cookie" onclick="update_cookie()" value="更新cookie" style="margin-left:0px;width: 100px;height: 35px" />
 </td>
      <td>
-     <button name="reply_content" onclick="auto_reply()" style="margin-left:0px;width: 100px;height: 35px" >自动回帖</button>
+     <button name="auto_reply" onclick="display_auto_reply()" style="margin-left:0px;width: 100px;height: 35px" >自动回帖</button>
+</td>
+    <td>
+     <button name="auto_visit" onclick="display_auto_visit()" style="margin-left:0px;width: 100px;height: 35px" >自动访问</button>
 </td>
 
       <td>
-     <button name="reply_content" onclick="exit_page()" style="margin-left:0px;width: 100px;height: 35px" >退出</button>
+     <button name="exit" onclick="exit_page()" style="margin-left:0px;width: 100px;height: 35px" >退出</button>
 </td>
 </tr>
 </table>
@@ -55,7 +61,11 @@
 
 </form>
 
-<form action="/auto_reply/" id="auto_reply" methord="get">
+<form action="/display_auto_reply/" id="display_auto_reply" methord="get">
+
+</form>
+
+<form action="/display_auto_visit/" id="display_auto_visit" methord="get">
 
 </form>
 
@@ -91,7 +101,8 @@
                       <TABLE style="BORDER-COLLAPSE: collapse"  height=273 cellSpacing=1 cellPadding=6 width="99%" class="table table-striped table-bordered">
                           {% for u in m %}
                                 <TR>
-                                  <TD width="5%" bgColor=#f5f5dc height=17><FONT size=3><input type="radio"  id="url_radio_id" name="url_radio" value={{ u.url }}></font></TD>
+                                  <TD width="5%" bgColor=#f5f5dc height=17><FONT size=3><input type="checkbox"  id="url_radio_id" name="url_radio" value={{ u.url }}></font></TD>
+{#                                  <TD width="5%" bgColor=#f5f5dc height=17><FONT size=3><input type="radio"  id="url_radio_id" name="url_radio" value={{ u.url }}></font></TD>#}
                                   <TD width="5%" bgColor=#f5f5dc height=17><FONT size=3 >{{ u.id }}</FONT></TD>
                                   <TD width="40%" bgColor=#f5f5dc height=17><FONT size=3><a href={{ u.url }} target="_blank">{{ u.url }}</a></FONT></TD>
                                   <TD width="40%" bgColor=#f5f5dc height=17><FONT size=3>{{ u.remark }}</FONT></TD>
@@ -103,11 +114,9 @@
                     </DIV>
                 </TD>
                 </TR>
-{#              </TBODY>#}
+
             </TABLE>
-{#                <input type="radio" name="sex" value="male" /> Male#}
-{#                <br />#}
-{#                <input type="radio" name="sex" value="Female" /> Female#}
+
         </DIV>
   {% elif forloop.counter == 2 %}
         <DIV align=center >
@@ -122,7 +131,8 @@
                       <TR>
                           <TD width="5%"  bgcolor="#deb887"><FONT  size=3>选择</FONT></TD>
                         <TD width="5%" bgcolor="#deb887"><FONT size=3>编号</FONT></TD>
-                        <TD width="90%" bgcolor="#deb887"><FONT size=3>回复内容</FONT></TD>
+                        <TD width="85%" bgcolor="#deb887"><FONT size=3>回复内容</FONT></TD>
+                          <TD width="5%" bgcolor="#deb887"><FONT size=3>删除</FONT></TD>
 
                       </TR>
                     </TABLE>
@@ -156,6 +166,13 @@
       </script>
   {% endif %}
 {% endfor %}
+<script>
+    {% if flag %}
+{#            alert("成功！");#}
+        {% else %}
+{#            alert("失败！");#}
+        {% endif %}
+</script>
 
 
 {#<button type="submit" name="reply" style="margin-left:15px;width: 100px;height: 35px" >回帖</button>#}
@@ -183,8 +200,12 @@ function refresh_page(){
     document.getElementById('refresh_page').submit();
 }
 
-function auto_reply(){
-    document.getElementById('auto_reply').submit();
+function display_auto_reply(){
+    document.getElementById('display_auto_reply').submit();
+}
+
+function display_auto_visit(){
+    document.getElementById('display_auto_visit').submit();
 }
 
 function exit_page(){
@@ -224,15 +245,6 @@ function post(URL, PARAMS) {
     temp.submit();
     return temp;
 }
-
-{#function reply_sucess()#}
-{#{#}
-{#	alert("发送成功！");#}
-{#}#}
-{#function reply_faild()#}
-{#{#}
-{#	alert("发送失败！");#}
-{#}#}
 function open_disply_add_url() {
     window.open('disply_add_url.html', 'newwindow', 'height=300, width=400, top=300, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no')
 }
@@ -284,6 +296,7 @@ function judgeRadioClicked()
 {
     //获得 单选选按钮name集合
     var url_radios = document.getElementsByName("url_radio");
+{#    console.log(url_radios);#}
     var reply_radios = document.getElementsByName("reply_radio");
     var url_flag = 0
     var reply_flag = 0
@@ -312,5 +325,10 @@ function judgeRadioClicked()
     {
         alert("请选择url地址和要回复的内容！");
     }
+}
+
+{# 更新cookie #}
+function update_cookie(){
+       window.open('update_cookie.html', 'newwindow', 'height=300, width=300, top=300, left=500, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no')
 }
 </script>
